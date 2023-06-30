@@ -1,0 +1,15 @@
+{
+    "reddit": {
+        "username": "test_username",
+        "password": "test_pw",
+        "client_id": "test_client_id",
+        "client_pw": "test_client_pw",
+        "user_agent": "test_user_agent",
+        "subreddits": ["sub1", "sub2"]
+    },
+    "ssd": {
+        "username": "test_username",
+        "password": "test_password",
+        "url": "https://www.testurl.com/sub/file?param=exists"
+    }
+}

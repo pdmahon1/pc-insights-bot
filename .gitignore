@@ -1,5 +1,5 @@
 # local project files
-credentials.json
+configurations.json
 .DS_Store
 
 # Byte-compiled / optimized / DLL files

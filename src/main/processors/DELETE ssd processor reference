@@ -1,3 +1,5 @@
+# a refernce from ocmarin's spreadsheet processing
+
 def chart_ssd(*args) -> str:
     """Formats the given SSD into a nice chart.
 

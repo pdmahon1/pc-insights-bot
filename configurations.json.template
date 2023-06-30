@@ -1,0 +1,15 @@
+{
+    "reddit": {
+        "username": "",
+        "password": "",
+        "client_id": "",
+        "client_pw": "",
+        "user_agent": "",
+        "subreddits": ["", ""]
+    },
+    "ssd": {
+        "username": "",
+        "password": "",
+        "url": ""
+    }
+}
