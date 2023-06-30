@@ -4,7 +4,7 @@
         "password": "",
         "client_id": "",
         "client_pw": "",
-        "user_agent": "",
+        "user_agent": "<platform>:<app ID>:<version string> (by /u/<reddit username>)",
         "subreddits": ["", ""]
     },
     "ssd": {
