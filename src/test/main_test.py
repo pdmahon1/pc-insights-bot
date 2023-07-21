@@ -17,7 +17,7 @@ class MainTest(unittest.TestCase):
         assert configs["reddit"]["username"]
         assert configs["reddit"]["password"]
         assert configs["reddit"]["client_id"]
-        assert configs["reddit"]["client_pw"]
+        assert configs["reddit"]["client_secret"]
         assert configs["reddit"]["user_agent"]
         assert configs["reddit"]["subreddits"]
         assert configs["spreadsheet"]
@@ -51,7 +51,7 @@ class MainTest(unittest.TestCase):
         
 
     def test_build_bot(self):
-        reddit, ssd = main.get_delegators(self.TEST_JSON_URI)
+        reddit, ssd = main.get_delegators_from_configs(self.TEST_JSON_URI)
         assert reddit
         assert ssd
 
