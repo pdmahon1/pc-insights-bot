@@ -1,71 +1,91 @@
 import configurations as Configurations
+import time
+from praw.models import Subreddit
 from src.main.delegators import RedditDelegator, SsdDelegator
+from src.main.factories.processor_factory import ProcessorFactory
 from src.main.models import RedditPost, SsdSpec
+from src.main.models.model import Model
 from src.main.processors import RedditProcessor, SsdProcessor
-from typing import Tuple #used for for method annotations
-
-''' SCRATCH
-posts_per_retrieval = 10
-request_time_interval = 300.0
-'''
-
-def get_uncommented_posts(delegator: RedditDelegator, processor: RedditProcessor) -> list[RedditPost]:
-    posts = delegator.get_posts()
-    return processor.filter_posts_by_user(posts)
+from src.main.processors.processor import Processor
 
 
-def get_reddit_delegator(configs: dict) -> RedditDelegator:
-    return RedditDelegator(**configs)
+def get_posts_from_subreddit(subreddit:Subreddit, reddit:RedditDelegator) -> list(RedditPost):    
+    return reddit.get_recent_posts(subreddit)
 
 
-def get_reddit_processor():
-    return RedditProcessor()
+def is_post_usable(post:RedditPost) -> bool:
+    return RedditProcessor.is_post_usable(post)
 
 
-def get_ssd_delegator(configs: dict) -> SsdDelegator:
-    return SsdDelegator()
+def get_item_type_from_title(title:str) -> str:
+    return RedditProcessor.get_item_type_from_title(title)
 
 
-def get_ssd_processor() -> SsdProcessor:
-    return SsdProcessor()
+def get_processor(item_type:str) -> Processor:
+    return ProcessorFactory.get(item_type) if item_type != None else None
 
 
-def get_delegators_from_configs(configs: dict) -> Tuple[RedditDelegator, SsdDelegator]:
-    reddit = get_reddit_delegator(configs["reddit"])
-    ssd = get_ssd_delegator(configs["ssd"])
-    return reddit, ssd
+def extract_data_from_title(title:str) -> Model:
+    item_type = get_item_type_from_title(title)
+    processor = get_processor(item_type)
+    model = SsdProcessor.extract_data_from_title(item_type)
 
 
-def get_configs(filename: str) -> dict:
+def handle_post(post:RedditPost):
+    '''
+    TODO Steps:
+    is flair or item in title valid? (e.g., is it SSD if we handle SSD's?)
+        - skip if not valid
+    extract part info
+    create new comment
+    submit comment
+    '''
+    if not is_post_usable(post):
+        return
+    
+    data = extract_data_from_title(post.title)
+
+
+def handle_posts(posts:list(RedditPost)):
+    for post in posts:
+        handle_post(post)
+
+
+def handle_subreddits(subreddits:list(str), delegators:dict):
+    reddit = delegators["reddit"]
+    for subreddit in subreddits:
+        # handle_subreddit(subreddit, delegators)
+        praw_subreddit = reddit.get_subreddit(subreddit)
+        posts = get_posts_from_subreddit(praw_subreddit, reddit)
+        handle_posts(posts)
+
+
+def get_delegators_using_configs(configs:dict):
+    '''
+    Returns a dictionary of Delegators.
+    '''
+    # Developer note: this method must be updated manually every time new functionality
+    # is added to the bot. Each key should be a known flair type in the given subreddit
+    # with "reddit" being the exception.
+    delegators = {}
+    delegators["reddit"] = RedditDelegator(configs["reddit"])
+    delegators["ssd"] = SsdDelegator(configs["ssd"])
+    return delegators
+
+
+def get_configs(filename:str) -> dict:
     return Configurations.get_credentials_from_json(filename)
 
 
-def run_bot(reddit: RedditDelegator, ssd: SsdDelegator) -> None:
-    """
-    Goals:
-    - Get recent posts
-    - filter the posts we have commented on
-    - Extract info from title
-    - Get info of device
-    - Prepare comment
-    - Make comment
-    - Wait 5 minutes
-    """
-    reddit_processor = get_reddit_processor()
-    ssd_processor = get_ssd_processor()
-
-    posts = get_uncommented_posts()
-    for post in posts:
-        title = reddit_processor.get_title(post)
-        ssd_spec = ssd_processor.extract_info_from_str(title)
-
-    pass
-        
-
 def run():
     configs = get_configs("../../configurations.json")
-    reddit, ssd = get_delegators_from_configs(configs)
-    run_bot(reddit, ssd)
+    delegators = get_delegators_using_configs(configs)
+    subreddits = configs["bot"]["subreddits"]
+
+    while True:
+        handle_subreddits(subreddits, delegators)
+        time.sleep(delegators["reddit"].sleep_time())
+        
 
 
 if __name__ == '__main__':
