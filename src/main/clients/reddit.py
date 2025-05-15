@@ -9,7 +9,7 @@ from praw.reddit import Reddit
 
 from src.main.models.reddit_post import RedditPost
 
-class RedditDelegator:
+class Reddit:
 
     def __init__(self, **configs):
         reddit = praw.Reddit(

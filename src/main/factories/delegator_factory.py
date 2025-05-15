@@ -1,5 +1,4 @@
-from src.main.processors.processor import Processor
-from src.main.processors.ssd_processor import SsdProcessor
+import src.main.delegators
 
 
 class DelegatorFactory:

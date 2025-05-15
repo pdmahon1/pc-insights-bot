@@ -3,14 +3,9 @@
         "username": "",
         "password": "",
         "client_id": "",
-        "client_pw": "",
+        "client_secret": "",
         "user_agent": "<platform>:<app ID>:<version string> (by /u/<reddit username>)",
         "bot_name": "NAME_OF_BOT_HERE"
         "subreddits": ["", ""]
-    },
-    "ssd": {
-        "username": "",
-        "password": "",
-        "url": ""
     }
 }

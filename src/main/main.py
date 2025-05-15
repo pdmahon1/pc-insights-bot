@@ -1,92 +1,44 @@
 import configurations as Configurations
 import time
 from praw.models import Subreddit
-from src.main.delegators import RedditDelegator, SsdDelegator
-from src.main.factories.processor_factory import ProcessorFactory
-from src.main.models import RedditPost, SsdSpec
-from src.main.models.model import Model
-from src.main.processors import RedditProcessor, SsdProcessor
-from src.main.processors.processor import Processor
-
-
-def get_posts_from_subreddit(subreddit:Subreddit, reddit:RedditDelegator) -> list(RedditPost):    
-    return reddit.get_recent_posts(subreddit)
-
-
-def is_post_usable(post:RedditPost) -> bool:
-    return RedditProcessor.is_post_usable(post)
-
-
-def get_item_type_from_title(title:str) -> str:
-    return RedditProcessor.get_item_type_from_title(title)
-
-
-def get_processor(item_type:str) -> Processor:
-    return ProcessorFactory.get(item_type) if item_type != None else None
-
-
-def extract_data_from_title(title:str) -> Model:
-    item_type = get_item_type_from_title(title)
-    processor = get_processor(item_type)
-    model = SsdProcessor.extract_data_from_title(item_type)
-
-
-def handle_post(post:RedditPost):
-    '''
-    TODO Steps:
-    is flair or item in title valid? (e.g., is it SSD if we handle SSD's?)
-        - skip if not valid
-    extract part info
-    create new comment
-    submit comment
-    '''
-    if not is_post_usable(post):
-        return
-    
-    data = extract_data_from_title(post.title)
-
-
-def handle_posts(posts:list(RedditPost)):
-    for post in posts:
-        handle_post(post)
-
-
-def handle_subreddits(subreddits:list(str), delegators:dict):
-    reddit = delegators["reddit"]
-    for subreddit in subreddits:
-        # handle_subreddit(subreddit, delegators)
-        praw_subreddit = reddit.get_subreddit(subreddit)
-        posts = get_posts_from_subreddit(praw_subreddit, reddit)
-        handle_posts(posts)
-
-
-def get_delegators_using_configs(configs:dict):
-    '''
-    Returns a dictionary of Delegators.
-    '''
-    # Developer note: this method must be updated manually every time new functionality
-    # is added to the bot. Each key should be a known flair type in the given subreddit
-    # with "reddit" being the exception.
-    delegators = {}
-    delegators["reddit"] = RedditDelegator(configs["reddit"])
-    delegators["ssd"] = SsdDelegator(configs["ssd"])
-    return delegators
-
-
-def get_configs(filename:str) -> dict:
-    return Configurations.get_credentials_from_json(filename)
-
+import src.main.clients
+import src.main.factories
+import src.main.models
+import src.main.processors
+import src.main.clients.reddit as Reddit
 
 def run():
-    configs = get_configs("../../configurations.json")
-    delegators = get_delegators_using_configs(configs)
-    subreddits = configs["bot"]["subreddits"]
+    try:
+        configs = get_configs("../../configurations.json")
+        Reddit.init(configs['reddit'])
+        start_bot(configs)
+    except FileNotFoundError:
+        print("Could not find the configurations.json file")
+        exit(1)
+    exit(0)
+    #X setup configs
+    #start the bot
+    #  get the next 10 posts
+    #  for each post:
+    #    skip this post if the bot already commented
+    #    determine the item type
+    #    for a supported type, extract data
+    #    submit information on that item
 
+def get_configs(filename:str) -> dict:
+    return Configurations.get_credentials_from_json(filename)       
+
+def start_bot(self, configs:dict):
     while True:
-        handle_subreddits(subreddits, delegators)
-        time.sleep(delegators["reddit"].sleep_time())
+        for subreddit in configs["reddit"]["subreddits"]:
+            handle_subreddit(subreddit)
+        #sleep
+
+def handle_subreddit(subreddit:str):
+    posts = get_first_ten_posts(subreddit)
+    for post in posts:
+        if has_bot_commented_on_post(post):
+            continue
         
-
-
 if __name__ == '__main__':
     run()
