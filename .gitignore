@@ -1,5 +1,5 @@
 # local project files
-configurations.json
+
 /!*.template
 .DS_Store
 

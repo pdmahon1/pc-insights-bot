@@ -37,8 +37,29 @@ class Reddit:
     @staticmethod
     def sleep_time(self):
         return self._INTERVAL_BETWEEN_REQUESTS
-        
+
+
+    @staticmethod
+    def verify_authenticated():
+        print(reddit.user.me())
 
     def send_comment(comment) -> None:
         # use PRAW to send a comment to the specific post
         pass
+
+
+
+    praw.Reddit("PC-Insights-Bot",
+            "vmeGen@KxXHKB3",
+            "_gP19kMmzfB9n-A0xZnpsw",
+            "3iv7cSGdWViaFQlfgfK1ORYJa6ARIA",
+            "Linux:PC-Insights-Bot:v0.0.1 (by /u/pdmahon1)")
+    
+
+reddit = praw.Reddit(
+    client_id="_gP19kMmzfB9n-A0xZnpsw",
+    client_secret="3iv7cSGdWViaFQlfgfK1ORYJa6ARIA",
+    user_agent="Linux:PC-Insights-Bot:v0.0.1 (by /u/pdmahon1)",
+    password="vmeGen@KxXHKB3",
+    username="PC-Insights-Bot"
+)
