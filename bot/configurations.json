@@ -36,7 +36,7 @@
             },
             "nvidia":{
                 "brands": ["nvidia", "aorus", "asus", "gigabyte", "msi", "pny", "zotac"],
-                "model-patterns": ["[rg]tx ?[1-9][0-9]{2,3} ?(super|ti)?"]
+                "model-patterns": ["[rg]tx ?[1-9][0-9]{2,3} ?(super|ti)?( fe| founder'?s? edition)?"]
             }            
         }
     }

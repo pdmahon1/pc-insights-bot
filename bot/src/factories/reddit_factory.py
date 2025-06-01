@@ -1,0 +1,2 @@
+class RedditFactory:
+    pass

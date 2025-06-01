@@ -1,33 +1,57 @@
-#Enhanced SSD Bot
-This is a Reddit bot that looks up posts marked with an [SSD] flair within the r/bapcsales and r/bapcsalescanada subreddits and then provides useful insights as a comment on that post.
+# PC Insights Bot
 
-Inspiration for this bot -- and credit for most of this README -- goes to ocmarin's original [u/SSDBot](https://github.com/ocmarin/ssd-bot).
+This is a Reddit bot that scans titles of recent posts on specific subreddits. If a post is given a known [tag], the bot will attempt to populate relevant information on that item and output its findings as a comment. The purpose is to inform Redditors who may be interested in purchasing the item if it's something they might want.
+
+- Subreddit supported: r/buildapcsales
+- Tags supported: none
+- Future subreddits I'd like to support: r/bapcsalescanada
+- Tags being worked on: (working on the primary back end system first)
+- Tags I'd like to support: [CPU], [GPU], [RAM]
+
+Inspiration for this bot goes to ocmarin's original [u/SSDBot](https://github.com/ocmarin/ssd-bot).
 
 ## Usage
-The bot will automatically attempt to find an SSD mentioned in a submission. In order to increase the bot's ability to correctly identify an SSD, the following is recommended:
-* Make certain the **brand name is in the title.**
-* Contain the **model name** as *clearly as possible.*
-* Have the brand/model **near the beginning of the title** (ie: immediately after the title).
-* Do not include any **other** *model keywords* (eg: "Samsung 970 Evo" is better than "Samsung 970 Evo (not Plus)").
-* If the bot **incorrectly identifies** the SSD, downvote the comment and it will record the issue automatically.
 
-## Categories
-Comments made by the bot will describe what *category of SSD* the given model falls under. This is explicitly written in the **first line of the comment.** This is a generalization about the usage the SSD; what it would perform best for and what type of customer the product is targetting.
+The `setup` bash script ensures the virtual environment is prepared and dependencies are downloaded prior to running the bot. It also checks that the PRAW module can connect with the Reddit API. To run it, ensure the current user has Execution permissions and enter this command on the terminal:
 
-### Category Types
-[u/NewMaxx](https://www.reddit.com/user/NewMaxx/) (the creator of the [SSDs spreadsheet](https://docs.google.com/spreadsheets/d/1B27_j9NDPU3cNlj2HKcrfpJKHkOf-Oi1DbuuQva2gT4/edit#gid=0) this bot utilizes) describes the details of [what the categories mean in this post.](https://www.reddit.com/r/NewMaxx/comments/dhvrdm/ssd_guides_resources/) The following descriptions are *paraphrasings of those guides.*
+```bash
+> ./setup
+```
 
-#### Sata
-* **Storage SATA**: Suitable for general data/games. Larger capacity, not the primary drive.
-* **Light SATA**: Suitable for OS in light usage/secondary PCs. Smaller in capacity (so TLC based).
-* **Budget SATA**: Suitable for OS use for primary PCs.
-* **Performance SATA**: Suitable for anything.
-#### NVMe
-* **Budget NVMe**: Entry level SATA replacements, usually for mobile/HTPC usage.
-* **Moderate NVMe**: Cheap alternative capable of any usage.
-* **Consumer NVMe**: High performance drives for the best everyday experience.
-* **Prosumer NVMe**: Specialized for content creation/workstation tasks. Generally some unique features/designs.
-* **Prosumer/Consumer NVMe**: Flexible, all-arounders. The top drives.
+The `setup` script tests the `praw.ini` configurations
+
+When the `setup` script asks if you want to run the bot, you can say yes and the bot will run. To do so without the `setup` script, you can do so manually using either of the following commands:
+
+```bash
+# Method 1
+./.venv-pc-insights-bot/bin/python3 ./bot/main.py
+
+# Method 2
+./run
+```
+
+
+## Why I Built This Project
+
+There are two primary reasons why I started this project.
+
+1. There was a need on r/buildapcsales. u/Newmaxx had his spreadsheet which has now been absorbed ny some other group. u/ocmarin had the original SSD bot, and when they stopped, others picked up the slack. And then the community relied on the goodwill of others to post relevant infomation. Why not build a bot myself, source the information and automate it?
+
+2. I don't know Python as much as I'd like. This is an excellent way to build upon the knowledge I learned while working as a teachers assistant at the University of Arizona (RIP Section Leader program). The section below tracks what I have learned from writing this project.
+
+## What I Have Learned So Far
+
+- The biggest one that I still struggle with? Over-engineering early in the project. Or simply over-engineering, period. 
+
+- Using the PRAW module, aka the Python Reddit API Wrapper.
+
+- Python packaging. I started with a simple `setup` script. Then I tried a Makefile. I stumbled on Poetry, but I decided it wasn't much better than Makefile for my needs. Then I got tired of the complexity of Makefile for my simple needs, so now I'm back to the `setup` bash script. (See first bullet point)
+
+- PIP and virtual environments (venv). Venv is sort of like containerizing the project without containers. I get the concept; I am not explaining it well. And PIP just makes sense. It's like `apt` or `snap` for Python.
+
+- Singletons. Writing them is kind of fun. The __new__ vs __init__ still isn't quite clear at the time of this writing, but we'll see how that changes over time. 
+
+- Modules and importing. It's been an absolute struggle and enlightening experience to wrap my head around how modules and importing works in Python. Java feels so simple and intuitive. The mere existence of `__init__.py` in each directory both makes sense and doesn't at the same time. For the sake of pushing out code, I'm doing what I'm told and testing everything along the way. 
 
 ## License
 This project in maintained under the GNU General Public License v3.0. See [LICENSE](https://github.com/pdmahon1/enhanced-ssd-bot/blob/main/LICENSE)

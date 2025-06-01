@@ -1,0 +1,7 @@
+[pc-insights-bot]
+client_id=Aw152IipdLJOr-fqP1jlsg
+client_secret=0nV7oTX_dAyEIRPzxaGrIq8WgW74vg
+password=pr7rvHGkFJ3Y83
+username=PC-Insights-Bot
+bot_author=/u/pdmahon1
+user_agent=script:%(username)s:v0.0.1 (by %(bot_author)s)

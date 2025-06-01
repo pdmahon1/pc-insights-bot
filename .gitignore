@@ -1,5 +1,6 @@
 # local project files
 praw.ini
+.venv-*
 /!*.template
 .DS_Store
 

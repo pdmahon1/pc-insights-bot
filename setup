@@ -1,16 +1,100 @@
 #! /bin/bash
 
+VENV=.venv-pc-insights-bot
+CHECK="\u2713"
+
+
+# Remove previously used files and directories
+echo -e "Starting a clean slate..."
+eval "rm -rf __pycache__ *.pyc *.pyo .pytest_cache .venv $VENV"
+echo -e "$CHECK Done."
+echo ""
+
 
 # Ensure Python 3 is installed
-if [[ $(python3 --version > /dev/null 2>&1; echo $?) -ne 0 ]] 
-  then
+echo "Test for Python 3 installation..."
+if [[ $(python3 --version > /dev/null 2>&1; echo $?) -ne 0 ]]; then
     echo "You must install Python 3 before running the project setup."
+    echo ""
     exit 1
+else
+    echo -e "$CHECK Python 3 is installed."
+    echo ""
 fi
 
-python3 -m venv ~/codebase/pc-insights-bot/venv-pc-insights-bot
 
-./venv-pc-insights-bot/bin/python3 -m pip install -r requirements.txt
+# ensure praw.ini configs exist in local .config directory
+echo "Test for praw.ini copied to $HOME/.config/..."
+if [[ ! -f ~/.config/praw.ini ]]; then
+  cp ./praw.ini.template $HOME/.config/
+  mv $HOME/.config/praw.ini.template $HOME/.config/praw.ini
+  echo -e "$CHECK a copy of praw.ini now exists in $HOME/.config/"
+elif [[ $(grep "[pc-insights-bot]" -F ~/.config/praw.ini > /dev/null; echo $?) -ne 0 ]]; then
+  # a [pc-insights-bot] section doesn't exist in the ~/.config/praw.ini
+  echo -e "\n" >> $HOME/.config/praw.ini
+  cat praw.ini.template >> $HOME/.config/praw.ini
+  echo -e "$CHECK Added new section in $HOME/.config/praw.ini"
+else
+  echo "A copy of praw.ini already exists in $HOME/.config/"
+fi
+echo ""
+
+
+echo "Setting up the virtual environment..." 
+# setup the virtual environment and download the required modules
+python3 -m venv "$VENV"
+eval "$VENV/bin/pip install -r requirements.txt > /dev/null"
+echo -e "$CHECK Virtual environment is set up."
+echo ""
+
+
+# Ensure the user has a configuration file
+echo "Checking for a valid configuration file..."
+if [[ ! -f praw.ini ]]; then
+      echo "Could not find a valid praw.ini or configurations.json file."
+      exit 1
+fi
+echo -e "$CHECK A valid configuration file was found."
+echo ""
+
+
+# Test the configuration file
+echo "Testing PRAW for valid configuration values..."
+eval "$VENV/bin/python3 ./bot/test_praw_config.py > /dev/null"
+test_praw_result=$?  
+if [[ $test_praw_result -ne 0 ]]; then
+  echo "ERROR! There is a configuration in praw.ini that is preventing the PRAW module from running correctly, or the program can not find praw.ini. To troubleshoot, try the following:"
+  echo "   1. Ensure praw.ini is in the project's root folder."
+  echo "   2. Ensure all items in praw.ini have the correct value assigned to them. Do not use the default values."
+  echo "   3. If praw.ini is not being used, then the configurations.json file is either missing or improperly configured."
+  exit 1
+elif [[ -f praw.ini ]]; then
+  echo -e "$CHECK PRAW can connect with the praw.ini configuration file."
+  echo ""
+else
+  echo -e "$CHECK test_praw_config.py successful (even though I don't know why)"
+fi
+
+echo "The project is now setup, and your configuration values have been validated. "
+echo "Would you like to run the application -- yes or no?"
+read response
+
+
+# if the response does not contain y or yes, the test will not run.
+if [[ "$response" =~ ^[yY]([eE][sS])?$ ]]; then
+  if [ -x ./run ]; then
+    ./run
+  elif [ -x ./bot/main.py ]; then
+    eval "$VENV/bin/python3 ./bot/main.py"
+  else
+    "User does not have permission to execute this project."
+  fi
+else 
+  echo "Response entered is not a yes. The application will not run."
+  echo "If you want to run the application manually, enter the following command:"
+  echo "    $VENV/bin/python3 ./bot/main.py"
+  echo ""
+fi
 
 # See the following for creating a Reddit app and adding OAuth:
 # https://github.com/reddit-archive/reddit/wiki/OAuth2
